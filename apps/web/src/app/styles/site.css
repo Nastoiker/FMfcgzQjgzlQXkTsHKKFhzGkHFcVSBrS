@@ -23,14 +23,14 @@ h2 {
   letter-spacing: -0.035em;
 }
 h1 {
-  font-size: clamp(27px, 3vw, 36px);
-  line-height: 1.2;
-  font-weight: 600;
+  font-size: clamp(28px, 3.3vw, 46px);
+  line-height: 1.06;
+  font-weight: 800;
 }
 h2 {
-  font-size: 19px;
-  line-height: 1.35;
-  font-weight: 600;
+  font-size: clamp(20px, 1.65vw, 25px);
+  line-height: 1.2;
+  font-weight: 700;
 }
 button,
 input,
@@ -75,10 +75,10 @@ label {
   min-width: 0;
 }
 .form-field .MuiOutlinedInput-root {
-  border-radius: 8px;
+  border-radius: 10px;
   min-width: 0;
-  background: var(--surface);
-  height: 40px;
+  background: var(--field);
+  height: 42px;
   font-size: 14px;
 }
 .form-field .MuiNativeSelect-select {
@@ -88,10 +88,10 @@ label {
 }
 input:not([type='hidden']) {
   color: var(--text);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  min-height: 40px;
+  background: var(--field);
+  border: 1px solid var(--control-border);
+  border-radius: 10px;
+  min-height: 42px;
   padding: 6px 12px;
   min-width: 0;
   max-width: 100%;
@@ -110,12 +110,18 @@ input:not([type='hidden']) {
   padding: 32px clamp(20px, 3.2vw, 52px) 56px;
 }
 .page-title {
-  margin-bottom: 24px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 20px;
+  flex-wrap: wrap;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--text);
+  margin-bottom: 20px;
 }
 .page-title p {
   color: var(--muted);
-  margin: 5px 0 0;
-  font-size: 14px;
+  margin: 6px 0 0;
 }
 .panel-heading {
   display: flex;
@@ -174,6 +180,9 @@ input:not([type='hidden']) {
   }
   .page-title {
     margin-bottom: 16px;
+  }
+  .page-title p {
+    font-size: 13px;
   }
 }
 .form-field .MuiOutlinedInput-notchedOutline {

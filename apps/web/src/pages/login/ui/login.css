@@ -1,42 +1,85 @@
 .login {
-  max-width: 460px;
-  padding: 24px;
-  margin: clamp(20px, 10vh, 120px) auto;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  padding: 0 clamp(16px, 4vw, 56px) 48px;
 }
 .login__bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 22px;
+  min-height: 76px;
+  border-bottom: 1px solid var(--border);
+}
+.login__bar .form-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .login__form {
+  place-self: center;
   display: grid;
-  gap: 18px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface);
-  padding: clamp(20px, 4vw, 32px);
-}
-.login__form:hover {
-  box-shadow: var(--shadow);
+  gap: 20px;
+  width: min(100%, 760px);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: clamp(32px, 7vw, 100px);
+  align-items: start;
+  border-top: 2px solid var(--text);
+  padding-block: 32px;
 }
 .login__form h1 {
-  font-size: 28px;
-  margin-bottom: 8px;
+  grid-column: 1;
+  grid-row: 1 / span 3;
+  max-width: 6em;
+  margin: 0;
+  font-size: clamp(40px, 5.5vw, 72px);
+  line-height: 0.98;
+  font-weight: 700;
+}
+.login__form > :not(h1) {
+  grid-column: 2;
+}
+.login__form label {
+  color: var(--text);
+  font-size: 13px;
 }
 .login__form input {
-  height: 44px;
+  height: 50px;
+  border-radius: 8px;
+  background: var(--surface);
+}
+.login__form .MuiButton-root {
+  min-height: 48px;
+  margin-top: 6px;
+  border-radius: 8px;
 }
 .login__form [role='alert'] {
   color: var(--bad);
   margin: 0;
 }
-@media (max-width: 420px) {
-  .login {
-    padding: 14px;
+@media (max-width: 640px) {
+  .login__bar {
+    min-height: 68px;
   }
-  .login__bar .theme .form-field {
-    max-width: 136px;
+  .login__bar .form-field label {
+    position: absolute;
+    clip-path: inset(50%);
+  }
+  .login__form {
+    align-self: start;
+    margin-top: 40px;
+    width: min(100%, 380px);
+    grid-template-columns: 1fr;
+    padding-top: 20px;
+  }
+  .login__form > :not(h1),
+  .login__form h1 {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .login__form h1 {
+    max-width: none;
+    margin-bottom: 12px;
   }
 }

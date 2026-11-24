@@ -1,0 +1,531 @@
+specification {
+  color audience #645570
+  color cabinetviolet #625AC4
+  color outside #685D70
+  color runtimecolor #5E59C4
+  color datacolor #26766D
+  color modulecolor #466B9E
+  color symbolcolor #47688D
+  color tablecolor #367565
+
+  element actor {
+    notation 'Человек'
+    style {
+      shape person
+      color audience
+    }
+  }
+
+  element system {
+    notation 'Программная система'
+    style {
+      shape rectangle
+      color cabinetviolet
+    }
+  }
+
+  element external {
+    notation 'Внешняя система'
+    style {
+      shape rectangle
+      color outside
+    }
+  }
+
+  element container {
+    notation 'Приложение или веб-сервер'
+    style {
+      shape rectangle
+      color runtimecolor
+    }
+  }
+
+  element database {
+    notation 'База данных'
+    style {
+      shape storage
+      color datacolor
+    }
+  }
+
+  element component {
+    notation 'Компонент'
+    style {
+      shape rectangle
+      color modulecolor
+    }
+  }
+
+  element code {
+    notation 'Класс, функция или объект'
+    style {
+      shape rectangle
+      color symbolcolor
+    }
+  }
+
+  element table {
+    notation 'Таблица'
+    style {
+      shape storage
+      color tablecolor
+    }
+  }
+}
+
+model {
+  actor client 'Клиент' {
+    description 'Менеджер одной компании. Смотрит показатели и обрабатывает отзывы своих филиалов.'
+  }
+
+  actor admin 'Администратор' {
+    description 'Выбирает компанию, просматривает её филиалы и запускает импорт.'
+  }
+
+  system cabinet 'Истинный интеллект' {
+    description 'Аналитический кабинет. Показывает присутствие филиалов на геосервисах за выбранный период.'
+    link ../../../README.md 'Открыть исходник'
+    container spa 'Кабинет в браузере' {
+      description 'Показывает отчёты, сравнение, отзывы и действия пользователя. Выполняется на устройстве пользователя.'
+      technology 'React 19 · Vite'
+      link ../../../apps/web/src/app/main.tsx 'Открыть исходник'
+      component routing 'Маршруты и страницы' {
+        description 'Главная точка входа, страница входа и три раздела кабинета. Выбор раздела хранится в параметре view.'
+        technology 'React Router'
+        link ../../../apps/web/src/app/cabinet-routes.tsx 'Открыть исходник'
+        code main 'Точка входа React' {
+          description 'Подключает BrowserRouter, QueryClient и ThemeProvider. /login ведёт к форме, остальные пути — к CabinetRoutes.'
+          link ../../../apps/web/src/app/main.tsx 'Открыть исходник'
+        }
+        code router 'CabinetRoutes' {
+          description 'Выбирает страницу по параметру view и оборачивает её в CabinetLayout.'
+          link ../../../apps/web/src/app/cabinet-routes.tsx 'Открыть исходник'
+        }
+        code layout 'CabinetLayout' {
+          description 'Получает текущего пользователя и только затем передаёт его странице кабинета.'
+          link ../../../apps/web/src/widgets/navigation/ui/cabinet-layout.tsx 'Открыть исходник'
+        }
+        code login 'LoginPage' {
+          description 'Собирает форму входа, оформление и название продукта.'
+          link ../../../apps/web/src/pages/login/ui/login-page.tsx 'Открыть исходник'
+        }
+        code dashboard 'DashboardPage' {
+          description 'Собирает ReportWorkspace и Report для обзора показателей.'
+          link ../../../apps/web/src/pages/dashboard/ui/dashboard-page.tsx 'Открыть исходник'
+        }
+        code branches 'BranchesPage' {
+          description 'Использует ReportWorkspace и Report с tableOnly для списка филиалов.'
+          link ../../../apps/web/src/pages/branches/ui/branches-page.tsx 'Открыть исходник'
+        }
+        code reviews 'ReviewsPage' {
+          description 'Собирает ReportWorkspace и ReviewPanel для обработки отзывов.'
+          link ../../../apps/web/src/pages/reviews/ui/reviews-page.tsx 'Открыть исходник'
+        }
+      }
+      component workspace 'Фильтры и справочники' {
+        description 'Общая рабочая область страниц. Загружает филиалы и отражает выбранные фильтры в URL.'
+        technology 'React · React Router'
+        link ../../../apps/web/src/widgets/report-workspace/ui/workspace.tsx 'Открыть исходник'
+        code root 'ReportWorkspace' {
+          description 'Выбирает состояние загрузки, ошибки, пустого результата или рабочую область.'
+          link ../../../apps/web/src/widgets/report-workspace/ui/report-workspace.tsx 'Открыть исходник'
+        }
+        code directory 'useDirectory' {
+          description 'Запрашивает филиалы, а для администратора также компании.'
+          link ../../../apps/web/src/widgets/report-workspace/model/use-directory.ts 'Открыть исходник'
+        }
+        code board 'Workspace' {
+          description 'Передаёт выбранные фильтры и доступные филиалы содержимому текущей страницы.'
+          link ../../../apps/web/src/widgets/report-workspace/ui/workspace.tsx 'Открыть исходник'
+        }
+        code filters 'useReportFilters' {
+          description 'Читает и меняет URL. При смене компании или филиала сбрасывает сравнение, при смене выборки — курсор.'
+          link ../../../apps/web/src/features/report-filters/model/use-report-filters.ts 'Открыть исходник'
+        }
+      }
+      component analytics 'Карточки, график и филиалы' {
+        description 'Один виджет строит дашборд и табличный раздел. Для сравнения запрашивает отчёт второго филиала.'
+        technology 'React · Recharts'
+        link ../../../apps/web/src/widgets/analytics/ui/report.tsx 'Открыть исходник'
+        code report 'Report' {
+          description 'Вызывает useDashboard один раз для основной выборки и распределяет данные по виджетам.'
+          link ../../../apps/web/src/widgets/analytics/ui/report.tsx 'Открыть исходник'
+        }
+        code cards 'MetricCards' {
+          description 'Показывает шесть значений и разницы с предыдущим периодом.'
+          link ../../../apps/web/src/widgets/analytics/ui/metric-cards.tsx 'Открыть исходник'
+        }
+        code chartRoot 'MetricChart' {
+          description 'Собирает переключатель показателя, выбор второго филиала и ChartBody.'
+          link ../../../apps/web/src/widgets/analytics/ui/metric-chart.tsx 'Открыть исходник'
+        }
+        code chart 'ChartBody' {
+          description 'Загружает второй отчёт при сравнении, затем передаёт выровненные точки в ChartSeries.'
+          link ../../../apps/web/src/widgets/analytics/ui/chart-body.tsx 'Открыть исходник'
+        }
+        code align 'alignDays' {
+          description 'Объединяет даты двух рядов. Пропущенное значение остаётся null.'
+          link ../../../apps/web/src/widgets/analytics/lib/chart-data.ts 'Открыть исходник'
+        }
+        code series 'ChartSeries' {
+          description 'Из одних точек строит график и доступную с клавиатуры таблицу точных значений.'
+          link ../../../apps/web/src/widgets/analytics/ui/chart-series.tsx 'Открыть исходник'
+        }
+        code table 'BranchTable' {
+          description 'Объединяет справочник с агрегатами. Строка ведёт к исходному филиалу через branchId.'
+          link ../../../apps/web/src/widgets/analytics/ui/branch-table.tsx 'Открыть исходник'
+        }
+        code sort 'sortedBranches' {
+          description 'Упорядочивает числа и названия, оставляет отсутствующую метрику внизу.'
+          link ../../../apps/web/src/widgets/analytics/lib/branch-sort.ts 'Открыть исходник'
+        }
+      }
+      component feedback 'Работа с отзывами' {
+        description 'Показывает список с фильтрами и курсором, даёт изменить статус и обновляет кеш списка.'
+        technology 'React · React Query'
+        link ../../../apps/web/src/widgets/reviews/ui/review-panel.tsx 'Открыть исходник'
+        code panel 'ReviewPanel' {
+          description 'Собирает фильтры, диапазон и список отзывов.'
+          link ../../../apps/web/src/widgets/reviews/ui/review-panel.tsx 'Открыть исходник'
+        }
+        code list 'ReviewList' {
+          description 'Показывает страницу, её состояния и переход по следующему курсору.'
+          link ../../../apps/web/src/widgets/reviews/ui/review-list.tsx 'Открыть исходник'
+        }
+        code edit 'ReviewItem' {
+          description 'Отображает один отзыв и предоставляет выбор статуса.'
+          link ../../../apps/web/src/features/change-review-status/ui/review-item.tsx 'Открыть исходник'
+        }
+        code change 'useChangeStatus' {
+          description 'Отправляет PATCH и помечает кеш отзывов устаревшим после успеха.'
+          link ../../../apps/web/src/features/change-review-status/model/use-change-status.ts 'Открыть исходник'
+        }
+      }
+      component actions 'Действия пользователя' {
+        description 'Вход, выход, загрузка CSV и запуск импорта. Каждое действие находится в отдельном слайсе features.'
+        technology 'React Query · mutations'
+        link ../../../apps/web/src/features 'Открыть исходник'
+        code login 'useLogin' {
+          description 'Отправляет логин и пароль, очищает старый кеш и сохраняет текущего пользователя.'
+          link ../../../apps/web/src/features/sign-in/model/use-login.ts 'Открыть исходник'
+        }
+        code logout 'useLogout' {
+          description 'Завершает сеанс, очищает кеш и возвращает на /login.'
+          link ../../../apps/web/src/features/sign-out/model/use-logout.ts 'Открыть исходник'
+        }
+        code csv 'useCsvExport' {
+          description 'Запрашивает CSV с текущими фильтрами и сохраняет ответ в браузере.'
+          link ../../../apps/web/src/features/export-statistics/model/use-csv-export.ts 'Открыть исходник'
+        }
+        code imports 'useImport' {
+          description 'Запускает импорт текущего филиала и периода, после успеха обновляет отчёты.'
+          link ../../../apps/web/src/features/import-statistics/model/use-import.ts 'Открыть исходник'
+        }
+        code tabs 'notifySessionChange' {
+          description 'Отправляет сигнал о смене сеанса. Остальные вкладки перезагружают кабинет.'
+          link ../../../apps/web/src/entities/session/lib/session-tabs.ts 'Открыть исходник'
+        }
+      }
+      component data 'Запросы и контракты' {
+        description 'Сущности владеют запросами и ключами кеша. Общий HTTP-клиент проверяет ответы JSON по схемам Zod.'
+        technology 'React Query · Fetch · Zod'
+        link ../../../apps/web/src/shared/api/http.ts 'Открыть исходник'
+        code me 'useSession' {
+          description 'Читает /me под текущей cookie.'
+          link ../../../apps/web/src/entities/session/model/use-session.ts 'Открыть исходник'
+        }
+        code catalog 'useBranches / useCompanies' {
+          description 'Загружает справочники по ключам, в которых учтён пользователь.'
+          link ../../../apps/web/src/entities/branch/model/use-catalog.ts 'Открыть исходник'
+        }
+        code dashboard 'useDashboard' {
+          description 'Подключает getDashboard к кешу по ключу reportKeys.period(viewer, range).'
+          link ../../../apps/web/src/entities/report/model/use-dashboard.ts 'Открыть исходник'
+        }
+        code get 'getDashboard' {
+          description 'Передаёт диапазон и схему ответа dashboard общему клиенту.'
+          link ../../../apps/web/src/entities/report/api/dashboard.ts 'Открыть исходник'
+        }
+        code reviewsHook 'useReviews' {
+          description 'Связывает getReviews с кешем текущего пользователя и выбранных фильтров.'
+          link ../../../apps/web/src/entities/review/model/use-reviews.ts 'Открыть исходник'
+        }
+        code reviews 'getReviews' {
+          description 'Получает массив отзывов и читает X-Next-Cursor для следующей страницы.'
+          link ../../../apps/web/src/entities/review/api/reviews.ts 'Открыть исходник'
+        }
+        code change 'changeReview' {
+          description 'Отправляет новый статус на /reviews/:id.'
+          link ../../../apps/web/src/entities/review/api/reviews.ts 'Открыть исходник'
+        }
+        code http 'request / fetchApi' {
+          description 'Вызывает относительный путь /api/. Для JSON применяет Zod, для CSV возвращает Response.'
+          link ../../../apps/web/src/shared/api/http.ts 'Открыть исходник'
+        }
+      }
+    }
+    container web 'Веб-сервер' {
+      description 'Выдаёт сборку SPA и передаёт запросы /api/ серверу приложения. Единственная публичная точка HTTP демостенда.'
+      technology 'Nginx · web:8080'
+      link ../../../apps/web/nginx.conf 'Открыть исходник'
+      component assets 'Раздача фронтенда' {
+        description 'Выдаёт index.html для клиентских маршрутов и версионированные файлы сборки из /assets/.'
+        technology 'Nginx · try_files'
+        link ../../../apps/web/nginx.conf 'Открыть исходник'
+      }
+      component proxy 'Прокси API' {
+        description 'Маршрут /api/ сохраняет путь запроса и передаёт его на api:3000.'
+        technology 'Nginx · proxy_pass'
+        link ../../../apps/web/nginx.conf 'Открыть исходник'
+      }
+    }
+    container api 'Сервер приложения' {
+      description 'Авторизует запросы, исполняет шесть предметных модулей и формирует ответы JSON или CSV.'
+      technology 'NestJS · api:3000'
+      link ../../../apps/api/src/app.module.ts 'Открыть исходник'
+      component entry 'Обработка HTTP' {
+        description 'Задаёт префикс /api, проверяет сессию и DTO, переводит ошибки в общий формат.'
+        technology 'NestJS guard, pipe, filter'
+        link ../../../apps/api/src/app.ts 'Открыть исходник'
+        code bootstrap 'createApp' {
+          description 'Настраивает HTTP-приложение, ValidationPipe, фильтр ошибок и Cache-Control.'
+          link ../../../apps/api/src/app.ts 'Открыть исходник'
+        }
+        code guard 'SessionGuard.canActivate' {
+          description 'Читает cookie session, проверяет подпись и срок JWT и разбирает состав claims. Для @AdminOnly проверяет роль.'
+          link ../../../apps/api/src/common/session.guard.ts 'Открыть исходник'
+        }
+        code claims 'claims' {
+          description 'Схема роли и идентификатора компании. Для клиента требуется положительный company_id.'
+          link ../../../apps/api/src/modules/auth/identity.ts 'Открыть исходник'
+        }
+        code actor 'Actor' {
+          description 'Читает проверенного пользователя из response.locals.user для аргумента контроллера.'
+          link ../../../apps/api/src/common/session.decorator.ts 'Открыть исходник'
+        }
+        code dto 'ValidationPipe' {
+          description 'Преобразует DTO, включает whitelist и отклоняет неизвестные поля.'
+          link ../../../apps/api/src/app.ts 'Открыть исходник'
+        }
+        code errors 'Errors.catch' {
+          description 'Сопоставляет доменные ошибки HTTP-статусам. Для лимита входа выставляет Retry-After.'
+          link ../../../apps/api/src/common/http-errors.filter.ts 'Открыть исходник'
+        }
+      }
+      component auth 'Вход и сессия' {
+        description 'Нормализует логин, ограничивает попытки, проверяет пароль, выдаёт JWT в cookie.'
+        technology 'AuthModule'
+        link ../../../apps/api/src/modules/auth/auth.module.ts 'Открыть исходник'
+        code controller 'AuthController' {
+          description 'login устанавливает cookie, me возвращает Actor, logout очищает cookie по пути /api.'
+          link ../../../apps/api/src/modules/auth/auth.controller.ts 'Открыть исходник'
+        }
+        code service 'AuthService.login' {
+          description 'Нормализует логин. Резервирует попытку, проверяет bcrypt и подписывает данные пользователя.'
+          link ../../../apps/api/src/modules/auth/auth.service.ts 'Открыть исходник'
+        }
+        code account 'AuthRepository.account' {
+          description 'Ищет одну запись по уникальному логину с помощью Prisma.'
+          link ../../../apps/api/src/modules/auth/auth.repository.ts 'Открыть исходник'
+        }
+        code attempts 'LoginAttempts' {
+          description 'reserve атомарно занимает попытку до bcrypt. release освобождает её после успешной проверки.'
+          link ../../../apps/api/src/modules/auth/login-attempts.repository.ts 'Открыть исходник'
+        }
+        code token 'jwt / sessionSeconds' {
+          description 'JwtService подписывает токен HS256. JWT и cookie получают один срок — восемь часов.'
+          link ../../../apps/api/src/modules/auth/session-token.ts 'Открыть исходник'
+        }
+      }
+      component companies 'Компании' {
+        description 'Выдаёт все компании администратору и собственную компанию клиенту.'
+        technology 'CompaniesModule'
+        link ../../../apps/api/src/modules/companies/companies.module.ts 'Открыть исходник'
+        code controller 'CompaniesController.list' {
+          description 'Принимает GET /companies и извлекает пользователя через Actor.'
+          link ../../../apps/api/src/modules/companies/companies.controller.ts 'Открыть исходник'
+        }
+        code service 'CompaniesService.list' {
+          description 'Передаёт проверенного пользователя репозиторию компаний.'
+          link ../../../apps/api/src/modules/companies/companies.service.ts 'Открыть исходник'
+        }
+        code repo 'CompaniesRepository.list' {
+          description 'Вызывает company.findMany. Для клиента добавляет where по идентификатору компании из JWT.'
+          link ../../../apps/api/src/modules/companies/companies.repository.ts 'Открыть исходник'
+        }
+      }
+      component branches 'Филиалы и область доступа' {
+        description 'Возвращает видимые филиалы. Экспортирует Selection, AccessScope и BranchesService для других модулей.'
+        technology 'BranchesModule'
+        link ../../../apps/api/src/modules/branches/branches.module.ts 'Открыть исходник'
+        code controller 'BranchesController' {
+          description 'list возвращает справочник, one принимает идентификатор филиала.'
+          link ../../../apps/api/src/modules/branches/branches.controller.ts 'Открыть исходник'
+        }
+        code service 'BranchesService' {
+          description 'list передаёт пользователя в репозиторий. one ищет ровно доступный филиал и возвращает 404 при отсутствии.'
+          link ../../../apps/api/src/modules/branches/branches.service.ts 'Открыть исходник'
+        }
+        code repo 'BranchesRepository.list' {
+          description 'Строит SELECT по branches и companies с обязательным предикатом видимости.'
+          link ../../../apps/api/src/modules/branches/branches.repository.ts 'Открыть исходник'
+        }
+        code scope 'AccessScope.predicate' {
+          description 'Возвращает параметризованное условие SQL для компании и филиала. Опубликован через BranchesModule.'
+          link ../../../apps/api/src/common/access-scope.ts 'Открыть исходник'
+        }
+        code selection 'Selection.ids' {
+          description 'Проверяет период и выбранный филиал. Возвращает выражение Prisma.Sql с SELECT доступных id.'
+          link ../../../apps/api/src/modules/branches/selection.service.ts 'Открыть исходник'
+        }
+        code period 'validatePeriod' {
+          description 'Проверяет порядок дат и максимальную длину интервала в 366 дней включительно.'
+          link ../../../apps/api/src/common/period.ts 'Открыть исходник'
+        }
+      }
+      component metrics 'Метрики и CSV' {
+        description 'Собирает шесть показателей, дневной график, разбивку по филиалам и сравнение с предыдущим периодом.'
+        technology 'MetricsModule'
+        link ../../../apps/api/src/modules/metrics/metrics.module.ts 'Открыть исходник'
+        code dashboard 'MetricsController.get' {
+          description 'GET /dashboard принимает Filter и Actor, возвращает результат сервиса.'
+          link ../../../apps/api/src/modules/metrics/metrics.controller.ts 'Открыть исходник'
+        }
+        code csv 'ExportController.csv' {
+          description 'GET /export устанавливает заголовки CSV и передаёт текст ответа.'
+          link ../../../apps/api/src/modules/metrics/metrics.controller.ts 'Открыть исходник'
+        }
+        code service 'MetricsService' {
+          description 'dashboard запускает две выборки параллельно. csv запрашивает дневные строки и собирает файл.'
+          link ../../../apps/api/src/modules/metrics/metrics.service.ts 'Открыть исходник'
+        }
+        code previous 'previousPeriod' {
+          description 'Строит предыдущий период той же длины, заканчивающийся накануне выбранного.'
+          link ../../../apps/api/src/modules/metrics/metrics.lib.ts 'Открыть исходник'
+        }
+        code repo 'MetricsRepository.report' {
+          description 'Выполняет SQL. Разбирает общий итог, динамику по дням и строки филиалов.'
+          link ../../../apps/api/src/modules/metrics/metrics.repository.ts 'Открыть исходник'
+        }
+        code query 'reportSql' {
+          description 'UNION ALL объединяет факты двух типов. GROUPING SETS считает текущий период, ROLLUP — предыдущий период и CSV.'
+          link ../../../apps/api/src/modules/metrics/metrics.repository.ts 'Открыть исходник'
+        }
+        code days 'chartDays' {
+          description 'Упорядочивает дневные точки по дате перед отправкой в JSON или CSV.'
+          link ../../../apps/api/src/modules/metrics/metrics.lib.ts 'Открыть исходник'
+        }
+      }
+      component reviews 'Отзывы' {
+        description 'Читает страницу отзывов и изменяет статус с учётом области пользователя.'
+        technology 'ReviewsModule'
+        link ../../../apps/api/src/modules/reviews/reviews.module.ts 'Открыть исходник'
+        code controller 'ReviewsController' {
+          description 'list возвращает массив и при продолжении заголовок X-Next-Cursor. change принимает новый статус.'
+          link ../../../apps/api/src/modules/reviews/reviews.controller.ts 'Открыть исходник'
+        }
+        code filters 'ReviewFilters / ReviewChange' {
+          description 'Валидируют период, оценку, статус, курсор и размер страницы. Смена статуса принимает отдельный DTO.'
+          link ../../../apps/api/src/modules/reviews/dto/reviews.dto.ts 'Открыть исходник'
+        }
+        code service 'ReviewsService' {
+          description 'list берёт разрешённые id и отделяет лишнюю строку. change передаёт предикат в UPDATE.'
+          link ../../../apps/api/src/modules/reviews/reviews.service.ts 'Открыть исходник'
+        }
+        code repo 'ReviewsRepository' {
+          description 'list читает страницу, change обновляет запись через связь с филиалом и возвращает результат RETURNING.'
+          link ../../../apps/api/src/modules/reviews/reviews.repository.ts 'Открыть исходник'
+        }
+        code query 'reviewSql' {
+          description 'Сортирует по created_at DESC, id ASC. Якорь курсора также ищется в разрешённой области.'
+          link ../../../apps/api/src/modules/reviews/reviews.repository.ts 'Открыть исходник'
+        }
+      }
+      component imports 'Импорт статистики' {
+        description 'Запрашивает снимки у источника. Учитывает попытки и фиксирует результат в журнале.'
+        technology 'ImportsModule'
+        link ../../../apps/api/src/modules/imports/imports.module.ts 'Открыть исходник'
+        code controller 'ImportsController.run' {
+          description 'POST /imports закрыт декоратором AdminOnly. Извлекает пользователя и DTO периода.'
+          link ../../../apps/api/src/modules/imports/imports.controller.ts 'Открыть исходник'
+        }
+        code service 'ImportsService.run' {
+          description 'Проверяет период и филиал, начинает запись журнала, запрашивает снимки и закрывает запуск.'
+          link ../../../apps/api/src/modules/imports/imports.service.ts 'Открыть исходник'
+        }
+        code download 'download' {
+          description 'Для временного сбоя делает до четырёх попыток с растущей паузой и случайной добавкой.'
+          link ../../../apps/api/src/modules/imports/import-source.ts 'Открыть исходник'
+        }
+        code read 'readSource' {
+          description 'Отправляет HTTP-запрос с таймаутом 600 мс. Таймаут, HTTP 429 и 5xx считаются временными.'
+          link ../../../apps/api/src/modules/imports/import-source.ts 'Открыть исходник'
+        }
+        code parse 'parseRows' {
+          description 'Валидирует JSON, филиал и даты. При повторе даты берёт последнее значение.'
+          link ../../../apps/api/src/modules/imports/import-source.ts 'Открыть исходник'
+        }
+        code repo 'ImportsRepository' {
+          description 'start создаёт running. finish объединяет upsert и success в транзакции. fail записывает failed и причину.'
+          link ../../../apps/api/src/modules/imports/imports.repository.ts 'Открыть исходник'
+        }
+      }
+      component store 'Доступ к PostgreSQL' {
+        description 'Экземпляр PrismaClient использует DATABASE_URL. Репозитории выполняют операции ORM и параметризованный SQL.'
+        technology 'Prisma Client'
+        link ../../../apps/api/src/common/database.ts 'Открыть исходник'
+      }
+    }
+    database db 'Основная база' {
+      description 'Хранит компании, пользователей, филиалы, дневные показатели, отзывы, журнал импорта и окна входа.'
+      technology 'PostgreSQL 16 · geo'
+      link ../../../prisma/schema.prisma 'Открыть исходник'
+      component schema 'Прикладная схема' {
+        description 'Семь таблиц с внешними ключами, ограничениями и индексами. Миграции применяются при старте API.'
+        technology 'Prisma · SQL'
+        link ../../../prisma/schema.prisma 'Открыть исходник'
+        table company 'companies' {
+          description 'PK id. Компания объединяет филиалы и клиентские учётные записи.'
+          technology 'Таблица PostgreSQL'
+          link ../../../prisma/schema.prisma 'Открыть исходник'
+        }
+        table user 'users' {
+          description 'PK id, UNIQUE login. Хеш пароля и роль. Клиент связан с компанией, для администратора company_id может быть NULL.'
+          technology 'Таблица PostgreSQL'
+          link ../../../prisma/schema.prisma 'Открыть исходник'
+        }
+        table branch 'branches' {
+          description 'PK id. Обязательный company_id определяет владельца филиала. Есть индекс по этому ключу.'
+          technology 'Таблица PostgreSQL'
+          link ../../../prisma/schema.prisma 'Открыть исходник'
+        }
+        table daily 'daily_metrics' {
+          description 'Составной PK (branch_id, date). Четыре неотрицательных счётчика. Один снимок на филиал и день.'
+          technology 'Таблица PostgreSQL'
+          link ../../../prisma/migrations/001_schema/migration.sql 'Открыть исходник'
+        }
+        table review 'reviews' {
+          description 'PK id. Филиал, время, оценка 1–5, статус, автор и текст. Индексы поддерживают фильтры и выдачу по времени.'
+          technology 'Таблица PostgreSQL'
+          link ../../../prisma/schema.prisma 'Открыть исходник'
+        }
+        table run 'import_runs' {
+          description 'PK id. Период, филиал, статус, количество строк, попытки и причина сбоя.'
+          technology 'Таблица PostgreSQL'
+          link ../../../prisma/schema.prisma 'Открыть исходник'
+        }
+        table window 'login_windows' {
+          description 'PK key — SHA-256 нормализованного логина. У окна есть свой срок и счётчик, внешний ключ к users отсутствует.'
+          technology 'Таблица PostgreSQL'
+          link ../../../prisma/migrations/003_login_windows/migration.sql 'Открыть исходник'
+        }
+      }
+    }
+  }
+
+  external provider 'Источник статистики' {
+    description 'Возвращает дневные снимки филиала по HTTP. В демостенде внешний контракт исполняет собственный сервис provider.'
+    technology 'Node.js · HTTP'
+    link ../../../scripts/provider.js 'Открыть исходник'
+  }
+}

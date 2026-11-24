@@ -35,10 +35,13 @@ export const Report = (
   return (
     <>
       <div className="panel-heading summary-heading">
-        <h2>Показатели</h2>
+        <div>
+          <h2>Показатели</h2>
+          <p>Изменение к предыдущему периоду</p>
+        </div>
         <CsvExport key={range} range={range} />
       </div>
-      <MetricCards metrics={report.data.metrics} previous={report.data.previous} />
+      <MetricCards report={report.data} selected={filters.metric} update={props.update} />
       <MetricChart days={report.data.days} {...props} />
       {table}
       {viewer.role === 'admin' && filters.branchId && <ImportPanel key={range} {...filters} />}

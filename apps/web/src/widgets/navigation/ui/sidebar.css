@@ -10,7 +10,7 @@
   height: 100dvh;
   min-width: 0;
   padding: 24px 16px 18px;
-  background: var(--surface);
+  background: var(--page);
   border-right: 1px solid var(--border);
 }
 .brand {
@@ -31,8 +31,8 @@
   color: var(--mui-palette-primary-contrastText);
 }
 .brand__type {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 750;
   line-height: 1.25;
   letter-spacing: -0.04em;
 }
@@ -50,17 +50,17 @@
   margin-top: 38px;
 }
 .sections .MuiListItemButton-root {
-  border-radius: 8px;
+  border-radius: var(--pill);
   gap: 12px;
   color: var(--muted);
   font-size: 14px;
-  font-weight: 550;
+  font-weight: 600;
   padding: 11px 14px;
 }
 .sections .MuiListItemButton-root.Mui-selected {
   background: var(--soft);
   color: var(--line);
-  font-weight: 600;
+  font-weight: 700;
 }
 .sidebar__account {
   display: grid;
@@ -107,9 +107,6 @@
 
 .sections .MuiListItemButton-root.Mui-selected:hover {
   background: var(--soft);
-  color: var(--line);
-}
-.sections .MuiListItemButton-root.Mui-selected {
   color: var(--line);
 }
 .mobile-bar {

@@ -1,4 +1,3 @@
-import type { TMetric } from '@/entities/report';
 const formatter = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 1 });
 const signed = new Intl.NumberFormat('ru-RU', {
   maximumFractionDigits: 1,
@@ -15,12 +14,4 @@ export const deltaFor = (
   if (delta > 0) return { value: signed.format(delta), tone: 'up' };
   if (delta < 0) return { value: signed.format(delta), tone: 'down' };
   return { value: '0', tone: 'neutral' };
-};
-export const tones: Record<TMetric, string> = {
-  views: 'violet',
-  site: 'blue',
-  calls: 'green',
-  routes: 'orange',
-  rating: 'gold',
-  reviews: 'pink',
 };

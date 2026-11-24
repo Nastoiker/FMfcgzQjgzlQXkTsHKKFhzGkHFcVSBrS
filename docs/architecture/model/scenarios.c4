@@ -1,0 +1,51 @@
+views {
+  dynamic view loginFlow {
+    title 'Сценарии / Вход клиента'
+    description 'Успешный вход. После неправильного пароля зарезервированное место остаётся занятым до конца окна.'
+    order 1
+    variant sequence
+    cabinet.spa.actions.login -> cabinet.web.proxy 'Отправляет форму входа через HTTP-клиент'
+    cabinet.web.proxy -> cabinet.api.auth.controller 'POST /api/login · публичный маршрут'
+    cabinet.api.auth.controller -> cabinet.api.auth.service 'Передаёт логин и пароль'
+    cabinet.api.auth.service -> cabinet.api.auth.attempts 'Резервирует место в окне'
+    cabinet.api.auth.service -> cabinet.api.auth.account 'Читает запись для проверки bcrypt'
+    cabinet.api.auth.service -> cabinet.api.auth.token 'Подписывает проверенные данные'
+    cabinet.api.auth.service -> cabinet.api.auth.attempts 'Освобождает успешную попытку'
+    cabinet.api.auth.controller -> cabinet.web.proxy 'Возвращает пользователя и Set-Cookie'
+    cabinet.web.proxy -> cabinet.spa.actions.login 'После ответа браузер сохраняет cookie, хук обновляет сессию и открывает кабинет'
+  }
+
+  dynamic view dashboardFlow {
+    title 'Сценарии / От URL до шести показателей'
+    description 'Запрос из браузера проходит через Nginx. Две выборки выполняются параллельно за равные периоды. Один ответ питает карточки, график и таблицу.'
+    order 2
+    variant sequence
+    cabinet.spa.analytics.report -> cabinet.spa.data.http 'Через useDashboard и getDashboard запрашивает отчёт'
+    cabinet.spa.data.http -> cabinet.web.proxy 'GET /api/dashboard · cookie и фильтры'
+    cabinet.web.proxy -> cabinet.api.metrics.dashboard 'Nest направляет запрос после SessionGuard'
+    cabinet.api.metrics.dashboard -> cabinet.api.metrics.service 'Передаёт пользователя и даты'
+    cabinet.api.metrics.service -> cabinet.api.branches.selection 'Получает подзапрос доступных филиалов'
+    cabinet.api.metrics.service -> cabinet.api.metrics.repo 'Параллельно запрашивает текущий и предыдущий периоды'
+    cabinet.api.metrics.repo -> cabinet.api.store 'Выполняет агрегаты PostgreSQL'
+    cabinet.api.metrics.service -> cabinet.api.metrics.dashboard 'Возвращает metrics, previous, days и branches'
+    cabinet.api.metrics.dashboard -> cabinet.web.proxy 'Возвращает отчёт в JSON'
+    cabinet.web.proxy -> cabinet.spa.data.http 'Передаёт ответ браузеру'
+    cabinet.spa.data.http -> cabinet.spa.analytics.report 'После проверки JSON хук передаёт данные карточкам, графику и таблице'
+  }
+
+  dynamic view importFlow {
+    title 'Сценарии / Импорт одного филиала'
+    description 'Успешный путь после проверки роли администратора. Ошибка источника или записи переводит журнал в failed.'
+    order 3
+    variant sequence
+    cabinet.spa.actions.imports -> cabinet.api.imports.controller 'POST /api/imports через Nginx после проверки роли'
+    cabinet.api.imports.controller -> cabinet.api.imports.service 'Передаёт филиал и даты'
+    cabinet.api.imports.service -> cabinet.api.branches.service 'Проверяет видимость филиала'
+    cabinet.api.imports.service -> cabinet.api.imports.repo 'start · создаёт запуск running'
+    cabinet.api.imports.service -> cabinet.api.imports.download 'Загружает снимки за период'
+    cabinet.api.imports.download -> provider 'Через readSource получает снимки по HTTP'
+    cabinet.api.imports.service -> cabinet.api.imports.repo 'finish · upsert и success в транзакции'
+    cabinet.api.imports.service -> cabinet.api.imports.controller 'Возвращает число сохранённых дней'
+    cabinet.api.imports.controller -> cabinet.spa.actions.imports 'Ответ через Nginx. Хук обновляет кеш отчётов'
+  }
+}

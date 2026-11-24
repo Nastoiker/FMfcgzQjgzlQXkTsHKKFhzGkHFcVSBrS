@@ -1,6 +1,18 @@
 import { expect, test } from '@playwright/test';
 import { login, pinDemoClock, select, duringDelay } from './browser.js';
 test.beforeEach(async ({ page }) => pinDemoClock(page));
+test('выбор показателя в сводке меняет график и сохраняется в ссылке', async ({ page }) => {
+  await login(page);
+  const summary = page.getByRole('region', { name: 'Показатели', exact: true });
+  const calls = summary.getByRole('button', { name: 'Звонки', exact: true });
+  await calls.focus();
+  await page.keyboard.press('Enter');
+  await expect(calls).toHaveAttribute('aria-pressed', 'true');
+  await expect(select(page, 'Показатель')).toHaveValue('calls');
+  await expect(page.getByRole('region', { name: 'Динамика: Звонки' })).toBeVisible();
+  await page.reload();
+  await expect(calls).toHaveAttribute('aria-pressed', 'true');
+});
 const columns = (page) =>
   page
     .locator('.cards')
@@ -8,6 +20,14 @@ const columns = (page) =>
       (el) =>
         el.ownerDocument.defaultView.getComputedStyle(el).gridTemplateColumns.split(' ').length,
     );
+test('на телефоне форма входа помещается в экран', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/login');
+  await expect(page.getByLabel('Логин')).toBeInViewport();
+  await expect(page.getByLabel('Пароль')).toBeInViewport();
+  await expect(page.getByRole('button', { name: 'Войти', exact: true })).toBeInViewport();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(375);
+});
 test('на 1440 px видны шесть карточек в ряд, на планшете и телефоне меняется меню и сетка', async ({
   page,
 }) => {

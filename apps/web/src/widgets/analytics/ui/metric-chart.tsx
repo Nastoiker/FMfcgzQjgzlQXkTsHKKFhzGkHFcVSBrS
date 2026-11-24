@@ -13,22 +13,24 @@ export const MetricChart = ({
   branches,
 }: IChartProps): ReactElement => (
   <section className="chart" aria-label={'Динамика: ' + labels[filters.metric]}>
-    <h2>Динамика по дням</h2>
-    <ChartControls filters={filters} update={update} branches={branches} />
+    <div className="chart__settings">
+      <h2>Динамика по дням</h2>
+      <ChartControls filters={filters} update={update} branches={branches} />
 
-    {!filters.branchId && (
-      <p className="chart__hint">Для сравнения выберите первый филиал в фильтре выше.</p>
-    )}
-    {filters.compareId && (
-      <button
-        className="chart__reset"
-        onClick={() => {
-          update({ compareId: '' });
-        }}
-      >
-        Сбросить сравнение
-      </button>
-    )}
+      {!filters.branchId && (
+        <p className="chart__hint">Для сравнения выберите первый филиал в фильтре выше.</p>
+      )}
+      {filters.compareId && (
+        <button
+          className="chart__reset"
+          onClick={() => {
+            update({ compareId: '' });
+          }}
+        >
+          Сбросить сравнение
+        </button>
+      )}
+    </div>
     <ChartBody days={days} viewer={viewer} filters={filters} branches={branches} />
   </section>
 );

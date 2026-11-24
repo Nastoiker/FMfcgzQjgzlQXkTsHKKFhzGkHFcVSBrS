@@ -12,9 +12,9 @@ export const theme = createTheme({
         success: { main: '#0AAF60', dark: '#087140' },
         warning: { main: '#F2A646', dark: '#84520F' },
         error: { main: '#F44336', dark: '#AC322B' },
-        text: { primary: '#3F3F3F', secondary: '#656565', disabled: '#D1D1D1' },
-        background: { default: '#F7F7FB', paper: '#FFFFFF' },
-        divider: '#E8E8EF',
+        text: { primary: '#202124', secondary: '#585964', disabled: '#9A9BA5' },
+        background: { default: '#FFFFFF', paper: '#FFFFFF' },
+        divider: '#E3E3EA',
         action: { selected: '#F3F3FD', hover: '#F3F3FD', disabled: '#D1D1D1' },
       },
     },
@@ -39,8 +39,8 @@ export const theme = createTheme({
     body1: { fontSize: 14, fontWeight: 400 },
     caption: { fontSize: 12 },
     button: { textTransform: 'none', fontWeight: 600 },
-    h1: { fontWeight: 600 },
-    h2: { fontWeight: 600 },
+    h1: { fontWeight: 800 },
+    h2: { fontWeight: 700 },
   },
   shape: { borderRadius: 8 },
   components: {
@@ -48,8 +48,11 @@ export const theme = createTheme({
     MuiButton: {
       defaultProps: { disableElevation: true },
       styleOverrides: {
-        root: { minHeight: 36 },
-        containedPrimary: { '&:hover': { backgroundColor: 'var(--line)' } },
+        root: { minHeight: 38, borderRadius: 10 },
+        containedPrimary: {
+          backgroundColor: 'var(--line)',
+          '&:hover': { backgroundColor: 'var(--button-hover)' },
+        },
       },
     },
     MuiPaper: { styleOverrides: { root: { backgroundImage: 'none' } } },

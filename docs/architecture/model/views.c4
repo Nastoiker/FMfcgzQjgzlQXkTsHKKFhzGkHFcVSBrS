@@ -1,0 +1,167 @@
+views {
+  view index {
+    title 'C1 · Контекст / Люди и система'
+    description 'Кто работает с кабинетом и откуда берутся дневные показатели. Стрелка указывает, кто начинает взаимодействие.'
+    order 1
+    include client, admin, cabinet, provider
+    autoLayout LeftRight
+  }
+
+  view containers of cabinet {
+    title 'C2 · Контейнеры / Кабинет в работе'
+    description 'Браузерная SPA, Nginx, NestJS и PostgreSQL образуют кабинет. Внешний контракт источника на стенде исполняет сервис provider.'
+    order 2
+    include client, admin, cabinet, cabinet.*, provider
+    autoLayout TopBottom 55 60
+    rank same { cabinet.spa, cabinet.web }
+    rank same { cabinet.api, cabinet.db }
+  }
+
+  view frontend of cabinet.spa {
+    title 'C3 · Компоненты / Браузерное приложение'
+    description 'Компоненты сгруппированы по работе пользователя. Страницы собирают виджеты, запросы живут в хуках, расчёты — в lib.'
+    order 3
+    include cabinet.spa, cabinet.spa.*, cabinet.web.proxy
+    include cabinet.spa.routing -> cabinet.spa.workspace with { title 'Подключает фильтры и справочники' }
+    include cabinet.spa.routing -> cabinet.spa.analytics with { title 'Открывает отчёт или таблицу' }
+    include cabinet.spa.routing -> cabinet.spa.actions with { title 'Подключает вход и выход' }
+    include cabinet.spa.analytics -> cabinet.spa.actions with { title 'Предлагает CSV и импорт' }
+    include cabinet.spa.analytics -> cabinet.spa.data with { title 'Читает основной и сравниваемый отчёты' }
+    include cabinet.spa.feedback -> cabinet.spa.data with { title 'Читает отзывы и меняет статус' }
+    include cabinet.spa.actions -> cabinet.spa.data with { title 'Отправляет запросы действий в API' }
+    autoLayout TopBottom
+  }
+
+  view backend of cabinet.api {
+    title 'C3 · Компоненты / Сервер приложения'
+    description 'Один процесс NestJS. Граница модуля определяет ответственность. BranchesModule экспортирует общие правила доступа для отчётов, отзывов и импорта.'
+    order 4
+    include cabinet.api, cabinet.api.*, cabinet.web.proxy, cabinet.db, provider
+    include cabinet.api.entry -> cabinet.api.auth with { title 'Обслуживает вход, выход и сессию' }
+    include cabinet.api.entry -> cabinet.api.metrics with { title 'Направляет /dashboard и /export' }
+    include cabinet.api.auth -> cabinet.api.store with { title 'Читает пользователей и ведёт окна входа' }
+    include cabinet.api.reviews -> cabinet.api.branches with { title 'Ограничивает выборку и смену статуса' }
+    include cabinet.api.imports -> cabinet.api.branches with { title 'Проверяет период и доступ к филиалу' }
+    autoLayout TopBottom
+  }
+
+  view gateway of cabinet.web {
+    title 'C3 · Компоненты / Веб-сервер'
+    description 'Два назначения Nginx на одном origin. Браузер загружает статику и отправляет запросы по относительному префиксу /api/.'
+    order 5
+    include cabinet.spa, cabinet.web, cabinet.web.*, cabinet.api
+    autoLayout LeftRight
+  }
+
+  view schema of cabinet.db {
+    title 'Данные / Таблицы и внешние ключи'
+    description 'Стрелка проходит от таблицы с внешним ключом к родительской таблице. У login_windows самостоятельный ключ. Prisma и три миграции задают схему.'
+    order 6
+    include cabinet.db.schema, cabinet.db.schema.*
+    autoLayout LeftRight
+  }
+
+  view httpCode of cabinet.api.entry {
+    title 'C4 · Код API / HTTP и проверка сессии'
+    description 'Глобальный guard установлен в AppModule. Перед контроллером выполняются guard и валидация DTO, ошибки отображает единый фильтр.'
+    order 7
+    include cabinet.api.entry, cabinet.api.entry.*, cabinet.api.auth.token
+    autoLayout TopBottom
+  }
+
+  view authCode of cabinet.api.auth {
+    title 'C4 · Код API / Вход и сессия'
+    description 'Что происходит между принятием пароля и установкой cookie. PostgreSQL хранит окно неудачных попыток.'
+    order 8
+    include cabinet.api.auth, cabinet.api.auth.*, cabinet.api.store
+    autoLayout TopBottom
+  }
+
+  view companiesCode of cabinet.api.companies {
+    title 'C4 · Код API / Компании'
+    description 'Три уровня обработки GET /api/companies. Собственную компанию клиента выбирает CompaniesRepository по Actor.'
+    order 9
+    include cabinet.api.companies, cabinet.api.companies.*, cabinet.api.store
+    autoLayout TopBottom
+  }
+
+  view branchesCode of cabinet.api.branches {
+    title 'C4 · Код API / Филиалы и изоляция'
+    description 'AccessScope строит SQL-условие. Selection собирает подзапрос доступных id для отчёта и отзывов. Явный филиал проверяется отдельно.'
+    order 10
+    include cabinet.api.branches, cabinet.api.branches.*, cabinet.api.store
+    autoLayout TopBottom
+  }
+
+  view metricsCode of cabinet.api.metrics {
+    title 'C4 · Код API / Дашборд и CSV'
+    description 'Два контроллера используют один сервис и репозиторий. В PostgreSQL уходят разрешённые id и границы периода.'
+    order 11
+    include cabinet.api.metrics, cabinet.api.metrics.*, cabinet.api.branches.selection, cabinet.api.store
+    autoLayout TopBottom
+  }
+
+  view reviewsCode of cabinet.api.reviews {
+    title 'C4 · Код API / Отзывы и курсор'
+    description 'Чтение страницы и смена статуса различаются. При изменении записи условие видимости входит непосредственно в UPDATE.'
+    order 12
+    include cabinet.api.reviews, cabinet.api.reviews.*, cabinet.api.branches.selection, cabinet.api.branches.scope, cabinet.api.store
+    autoLayout TopBottom
+  }
+
+  view importsCode of cabinet.api.imports {
+    title 'C4 · Код API / Импорт статистики'
+    description 'Маршрут администратора, повтор временных ошибок, проверка входных строк и транзакционное завершение импорта.'
+    order 13
+    include cabinet.api.imports, cabinet.api.imports.*, cabinet.api.branches.service, provider
+    autoLayout TopBottom
+  }
+
+  view routesCode of cabinet.spa.routing {
+    title 'C4 · Код браузера / Маршруты и страницы'
+    description 'Четыре страницы имеют собственные слайсы. Филиалы и отзывы открываются через параметр view.'
+    order 14
+    include cabinet.spa.routing, cabinet.spa.routing.*, cabinet.spa.workspace.root
+    autoLayout TopBottom
+  }
+
+  view workspaceCode of cabinet.spa.workspace {
+    title 'C4 · Код браузера / Фильтры и справочники'
+    description 'Общая область разрешает состояние справочников до отображения содержимого страницы.'
+    order 15
+    include cabinet.spa.workspace, cabinet.spa.workspace.*, cabinet.spa.data.catalog
+    autoLayout TopBottom
+  }
+
+  view reportCode of cabinet.spa.analytics {
+    title 'C4 · Код браузера / Отчёт в браузере'
+    description 'Один JSON питает карточки, график и таблицу. При сравнении второй ряд приходит отдельным запросом к тому же API.'
+    order 16
+    include cabinet.spa.analytics, cabinet.spa.analytics.*, cabinet.spa.data.dashboard
+    autoLayout TopBottom
+  }
+
+  view feedbackCode of cabinet.spa.feedback {
+    title 'C4 · Код браузера / Отображение отзывов'
+    description 'Фильтры меняют адрес страницы, курсор передаётся серверу, успешная смена статуса обновляет список.'
+    order 17
+    include cabinet.spa.feedback, cabinet.spa.feedback.*, cabinet.spa.data.reviewsHook, cabinet.spa.data.change
+    autoLayout TopBottom
+  }
+
+  view actionsCode of cabinet.spa.actions {
+    title 'C4 · Код браузера / Вход, выход, экспорт и импорт'
+    description 'Действия пользователя используют общий HTTP-клиент. Смена сессии очищает кеш и синхронизирует вкладки.'
+    order 18
+    include cabinet.spa.actions, cabinet.spa.actions.*, cabinet.spa.data.http
+    autoLayout TopBottom
+  }
+
+  view queryCode of cabinet.spa.data {
+    title 'C4 · Код браузера / Запросы и кеш'
+    description 'Сущности определяют ключи запросов и схемы. HTTP-клиент один для всех слайсов.'
+    order 19
+    include cabinet.spa.data, cabinet.spa.data.*, cabinet.web.proxy
+    autoLayout TopBottom
+  }
+}
