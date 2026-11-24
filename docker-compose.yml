@@ -1,0 +1,53 @@
+name: geo-atlas
+services:
+  db:
+    image: postgres:16
+    environment: { POSTGRES_PASSWORD: demo, POSTGRES_DB: geo }
+    volumes: [geo-data:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL","pg_isready -U postgres -d geo"], interval: 2s, timeout: 3s, retries: 30 }
+  test-db:
+    profiles: [test]
+    image: postgres:16
+    environment: { POSTGRES_PASSWORD: demo, POSTGRES_DB: geo_test }
+    ports: ["127.0.0.1:${TEST_DB_PORT:-55439}:5432"]
+    healthcheck: { test: ["CMD-SHELL","pg_isready -U postgres -d geo_test"], interval: 2s, timeout: 3s, retries: 30 }
+  perf-db:
+    profiles: [perf]
+    image: postgres:16
+    environment: { POSTGRES_PASSWORD: demo, POSTGRES_DB: geo_perf }
+    volumes: [geo-perf:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL","pg_isready -U postgres -d geo_perf"], interval: 2s, timeout: 3s, retries: 30 }
+  benchmark:
+    profiles: [perf]
+    build: { context: ., target: benchmark }
+    depends_on: { perf-db: {condition: service_healthy} }
+    environment: { DATABASE_URL: "postgres://postgres:demo@perf-db/geo_perf" }
+    entrypoint: ["node","scripts/perf-db.js"]
+  provider:
+    build: { context: ., target: provider }
+  api:
+    build: { context: ., target: api }
+    depends_on: { db: {condition: service_healthy} }
+    environment:
+      DATABASE_URL: postgres://postgres:demo@db/geo
+      JWT_SECRET: ${JWT_SECRET:-}
+      PROVIDER_URL: ${PROVIDER_URL:-http://provider:3100}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    healthcheck:
+      test: ["CMD","node","-e","fetch('http://127.0.0.1:3000/api/me').then(r=>process.exit(r.status===401?0:1)).catch(()=>process.exit(1))"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  web:
+    build: { context: ., target: web }
+    ports: ["127.0.0.1:${WEB_PORT:-5173}:8080"]
+    depends_on: { api: {condition: service_healthy} }
+    healthcheck:
+      test: ["CMD","wget","-q","--spider","http://127.0.0.1:8080/index.html"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  geo-data:
+  geo-perf:

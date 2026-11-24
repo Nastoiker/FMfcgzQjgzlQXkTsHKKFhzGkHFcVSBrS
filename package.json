@@ -1,0 +1,69 @@
+{
+  "name": "geo-cabinet",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "check": "npm run typecheck && npm run build:web && npm run lint && npm run format && npm test && npm run e2e",
+    "typecheck": "tsc -p apps/api && tsc-alias -p apps/api/tsconfig.json && tsc -p apps/web --noEmit",
+    "lint": "eslint apps scripts e2e prisma/seed.js *.config.*",
+    "format": "prettier --check apps scripts e2e prisma/seed.js *.config.* package.json",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand && vitest run --root apps/web",
+    "preparedb": "prisma migrate deploy && node prisma/seed.js",
+    "e2e": "playwright test",
+    "build:web": "vite build apps/web --config apps/web/vite.config.js",
+    "mutations": "node scripts/verify-mutations.js",
+    "screenshots": "node scripts/capture-screens.js",
+    "seed:perf": "docker compose --profile perf run --build --rm benchmark seed",
+    "perf": "docker compose --profile perf run --build --rm benchmark measure"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.2.11",
+    "@nestjs/core": "^11.2.11",
+    "@nestjs/jwt": "^11.0.2",
+    "@nestjs/platform-express": "^11.2.11",
+    "@prisma/client": "~6.19.3",
+    "@tanstack/react-query": "^5.108.4",
+    "bcrypt": "^6.0.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
+    "express": "^5.3.0",
+    "prisma": "~6.19.3",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.6",
+    "recharts": "^3.11.1",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/bcrypt": "^6.0.0",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/supertest": "^7.2.1",
+    "eslint": "^9.39.5",
+    "eslint-plugin-simple-import-sort": "^14.0.0",
+    "jest": "^29.7.0",
+    "jsdom": "^26.1.0",
+    "prettier": "^3.10.1",
+    "supertest": "^7.3.2",
+    "tsc-alias": "^1.9.10",
+    "typescript": "5.9",
+    "typescript-eslint": "^8.74.0",
+    "vite": "^6.4.6",
+    "vitest": "~4.1.12"
+  },
+  "overrides": {
+    "@prisma/config@6.19.3": {
+      "deepmerge-ts": "8.0.0",
+      "effect": "3.22.5"
+    }
+  }
+}

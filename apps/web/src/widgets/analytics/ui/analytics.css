@@ -1,0 +1,65 @@
+.chart,
+.branch-table.MuiPaper-root,
+.reviews,
+.import {
+  padding: 20px 22px;
+  margin-bottom: 18px;
+  border-radius: var(--radius);
+}
+.chart__controls,
+.chart__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 12px 0;
+  align-items: center;
+}
+.chart__controls .form-field {
+  flex: 0 1 240px;
+}
+.chart__hint,
+.chart__figure figcaption {
+  color: var(--muted);
+  font-size: 12px;
+}
+.chart__hint {
+  margin: 8px 0;
+}
+.chart__figure {
+  margin: 0;
+  min-width: 0;
+}
+.chart__legend {
+  list-style: none;
+  padding: 0;
+  font-size: 13px;
+}
+.chart__legend li::before {
+  content: '';
+  width: 20px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 7px;
+  border-top: 3px solid var(--primary-line);
+}
+.chart__legend li + li::before {
+  border-top: 3px dashed var(--secondary-line);
+}
+.chart__reset {
+  margin-bottom: 6px;
+}
+.recharts-wrapper {
+  font-size: 11px;
+}
+@media (max-width: 650px) {
+  .chart__controls .form-field {
+    flex: 1 1 180px;
+  }
+  .chart__controls {
+    gap: 8px;
+  }
+}
+.chart__figure .recharts-responsive-container {
+  max-width: 100%;
+  overflow: clip;
+}

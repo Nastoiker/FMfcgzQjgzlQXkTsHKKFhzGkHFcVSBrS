@@ -1,0 +1,141 @@
+.chart__table summary {
+  color: var(--line);
+  font-size: 13px;
+  cursor: pointer;
+  width: fit-content;
+  padding: 8px 0;
+}
+.table-scroll,
+.chart__scroll {
+  overflow: auto;
+  max-width: 100%;
+}
+.branch-table .panel-heading {
+  justify-content: flex-start;
+}
+.branch-table table,
+.chart__table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.branch-table th,
+.branch-table td,
+.chart__table td,
+.chart__table th {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: right;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.branch-table thead th,
+.chart__table thead th {
+  background: var(--page);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--muted);
+}
+.branch-table th:first-child,
+.chart__table th:first-child,
+.chart__table caption {
+  text-align: left;
+}
+.branch-table tbody small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 450;
+}
+.branch-table tbody a {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.branch-table tbody tr,
+.chart__table tbody tr {
+  height: 48px;
+}
+.branch-table tbody tr:hover,
+.chart__table tbody tr:hover {
+  background: var(--soft);
+}
+.table-sort {
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  font: inherit;
+}
+.branch-table th[aria-sort] .table-sort {
+  color: var(--line);
+}
+.branch-table th[aria-sort] .table-sort::after {
+  content: '';
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border: 3px solid transparent;
+  margin-left: 3px;
+  vertical-align: middle;
+}
+.branch-table th[aria-sort='ascending'] .table-sort::after {
+  border-bottom-color: currentColor;
+  transform: translateY(-2px);
+}
+.branch-table th[aria-sort='descending'] .table-sort::after {
+  border-top-color: currentColor;
+  transform: translateY(2px);
+}
+@media (max-width: 650px) {
+  .branch-table th,
+  .branch-table td {
+    padding: 8px;
+  }
+}
+@media (max-width: 450px) {
+  .branch-table.MuiPaper-root {
+    padding-inline: 8px;
+  }
+  .branch-table th,
+  .branch-table td {
+    padding: 8px 2px;
+    font-size: 12px;
+  }
+  .branch-table tbody th {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .branch-table tbody a {
+    display: inline;
+  }
+  .branch-table tbody a svg {
+    display: none;
+  }
+  .branch-table tbody small {
+    font-size: 10px;
+  }
+  .table-sort {
+    position: relative;
+  }
+  .branch-table th[aria-sort] .table-sort::after {
+    position: absolute;
+    inset: auto auto -4px 50%;
+    margin: 0;
+  }
+}
+.branch-table tbody th,
+.branch-table tbody td,
+.chart__table tbody th,
+.chart__table tbody td {
+  padding-block: 4px;
+  line-height: 20px;
+}
+.branch-table tbody small {
+  line-height: 16px;
+}
